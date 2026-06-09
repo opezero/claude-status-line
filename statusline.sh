@@ -202,9 +202,17 @@ rl_fmt() {
   if [ "$p_int" -ge 80 ]; then color="$C_RED"
   elif [ "$p_int" -ge 50 ]; then color="$C_YELLOW"
   else color="$C_GREEN"; fi
+  # 5段階の視覚バー
+  local rl_filled=$((p_int / 20))
+  [ "$rl_filled" -gt 5 ] && rl_filled=5
+  local rl_empty=$((5 - rl_filled))
+  local rl_bar=""
+  local i
+  for ((i=0; i<rl_filled; i++)); do rl_bar+="■"; done
+  for ((i=0; i<rl_empty; i++)); do rl_bar+="□"; done
   local reset_str="--"
   [ "${reset:-0}" -gt 0 ] 2>/dev/null && reset_str="$(fmt_until "$reset")"
-  printf "%s%s %d%% ~%s%s" "$color" "$icon" "$p_int" "$reset_str" "$C_RESET"
+  printf "%s%s %s %d%% ~%s%s" "$color" "$icon" "$rl_bar" "$p_int" "$reset_str" "$C_RESET"
 }
 rl5_str=$(rl_fmt "$rl5_pct" "$rl5_reset" "$I_RL5")
 rl7_str=$(rl_fmt "$rl7_pct" "$rl7_reset" "$I_RL7")
@@ -224,11 +232,13 @@ printf "${C_BLUE}%s ${C_BOLD}%s${C_RESET} ${C_DIM}%s %s${C_RESET} ${SEP} %s ${SE
   "$I_CTX" "$(fmt $current_used)" "$(fmt $context_size)" "$bar" "$pct_int" "$perf" \
   "$I_IN" "$(fmt $total_input)" "$I_OUT" "$(fmt $total_output)"
 
-printf "%s%s %s/min ${SEP} %s %s ${SEP} %s %s ${SEP} %s %s ${SEP} %s ${SEP} %s\n" \
+printf "%s ${SEP} %s\n" \
+  "$rl5_str" \
+  "$rl7_str"
+
+printf "%s%s %s/min ${SEP} %s %s ${SEP} %s %s ${SEP} %s %s\n" \
   "$git_info" \
   "$I_BRN" "$burn_rate_str" \
   "$I_DAY" "$(fmt $d_total)" \
   "$I_WEK" "$(fmt $w_total)" \
-  "$I_MON" "$(fmt $m_total)" \
-  "$rl5_str" \
-  "$rl7_str"
+  "$I_MON" "$(fmt $m_total)"
