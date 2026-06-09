@@ -204,6 +204,8 @@ rl_fmt() {
   else color="$C_GREEN"; fi
   # 5段階の視覚バー
   local rl_filled=$((p_int / 20))
+  # 0%超なら最低1マスは点灯させる（1〜19%が空バーに見えるのを防ぐ）
+  [ "$rl_filled" -eq 0 ] && [ "$p_int" -gt 0 ] && rl_filled=1
   [ "$rl_filled" -gt 5 ] && rl_filled=5
   local rl_empty=$((5 - rl_filled))
   local rl_bar=""
